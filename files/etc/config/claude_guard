@@ -1,0 +1,71 @@
+
+config main 'main'
+	# 1 = 保护启用；停用请用管理页按钮或 /usr/libexec/claude-guard/ctl disable
+	option enabled '1'
+	# reject = 立即拒绝（TCP 回 RST）；drop = 静默丢弃
+	option action 'reject'
+	option log '1'
+	option check_interval '15'
+	option canary_interval '60'
+	option trace_interval '600'
+	option discover '1'
+	option discover_interval '21600'
+	# 动态地址多久没再解析到就过期（秒，默认 30 天）
+	option dyn_ttl '2592000'
+	# 一次发现的新地址超过这个数，只报警不加入
+	option max_new '16'
+	# PassWall 给已代理连接打的标记、它的直连进程组（自检用）。auto = 从 PassWall 自己的脚本里读
+	option passwall_mark 'auto'
+	option bypass_gid 'auto'
+	# 允许直连 Claude 的设备（默认没有）
+	# list exempt_src '192.168.1.100'
+	# 静态段以外再加的地址段
+	# list extra_prefix '1.2.3.0/24'
+	# 定期解析、发现段外地址的主机名（只放 Anthropic 自己的）
+	list domain 'claude.ai'
+	list domain 'www.claude.ai'
+	list domain 'api.anthropic.com'
+	list domain 'console.anthropic.com'
+	list domain 'platform.claude.com'
+	list domain 'code.claude.com'
+	list domain 'docs.claude.com'
+	list domain 'support.claude.com'
+	list domain 'claude.com'
+	list domain 'www.claude.com'
+	list domain 'anthropic.com'
+	list domain 'www.anthropic.com'
+	list domain 'claudeusercontent.com'
+	list domain 'statsig.anthropic.com'
+	list domain 'downloads.claude.ai'
+	list domain 'mcp-proxy.anthropic.com'
+	list domain 'assets-proxy.anthropic.com'
+	list domain 'clau.de'
+	# 写进 PassWall 分流规则的域名（domain: 匹配本身和所有子域名）
+	list passwall_domain 'claude.ai'
+	list passwall_domain 'claude.com'
+	list passwall_domain 'anthropic.com'
+	list passwall_domain 'claudeusercontent.com'
+	list passwall_domain 'clau.de'
+	# Claude 指定出口：PassWall 节点 ID（在管理页「设置」里选）；空 = 跟随默认节点
+	option proxy_node ''
+	# 装了 PassWall 时，自动在它的分流规则里放一条 Claude 规则（只写配置，不重启 PassWall）。
+	# 在管理页删除这条规则后会自动变成 0，不再加回去
+	option passwall_auto_rule '1'
+	# 自动更新目标列表（失败保留原有内容）。装了 PassWall 时等它在运行才更新；没装代理插件时宽带通了就更新
+	option auto_update '1'
+	option update_interval '86400'
+	# 统一列表：自己维护的一个 JSON 文件的地址（https://）。配了并且拿得到，就以它为准，下面的公开来源只做兜底。
+	# 格式见 README「统一列表」。空 = 不用
+	option central_url ''
+	# 网段：ARIN 里登记在 Anthropic 名下的网段、Anthropic ASN 的路由公告
+	option src_arin '1'
+	option arin_org 'AP-2440'
+	option src_ripe '1'
+	option asn '399358'
+	# 域名：本地 geosite.dat 类别（PassWall 带来并每周更新，路由器上没有就跳过）、v2fly/domain-list-community 在线文件
+	option src_geosite '1'
+	option geosite_category 'anthropic'
+	option src_v2fly '1'
+	option v2fly_url 'https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/anthropic'
+	option max_new_prefix '8'
+	option max_new_domain '40'

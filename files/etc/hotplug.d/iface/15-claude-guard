@@ -1,0 +1,6 @@
+#!/bin/sh
+# 拨号、IPv6 上线等接口事件后立刻复核一次（拦截规则本身不依赖接口，复核只是加快发现问题）
+[ "$ACTION" = "ifup" ] || [ "$ACTION" = "ifupdate" ] || exit 0
+[ -x /usr/libexec/claude-guard/ctl ] || exit 0
+setsid /usr/libexec/claude-guard/ctl check >/dev/null 2>&1 </dev/null &
+exit 0

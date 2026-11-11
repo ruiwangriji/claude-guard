@@ -1,0 +1,9 @@
+/etc/claude-guard/
+/etc/init.d/claude-guard
+/etc/rc.d/S13claude-guard
+/etc/hotplug.d/iface/15-claude-guard
+/usr/libexec/claude-guard/
+/usr/share/luci/menu.d/luci-app-claude-guard.json
+/usr/share/rpcd/acl.d/luci-app-claude-guard.json
+/www/luci-static/resources/view/claude-guard/
+/lib/upgrade/keep.d/claude-guard

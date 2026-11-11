@@ -1,0 +1,71 @@
+{
+	"luci-app-claude-guard": {
+		"description": "Claude 防直连保护",
+		"read": {
+			"file": {
+				"/usr/libexec/claude-guard/ctl status": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl passwall-test": [
+					"exec"
+				]
+			},
+			"uci": [
+				"claude_guard",
+				"passwall"
+			]
+		},
+		"write": {
+			"file": {
+				"/usr/libexec/claude-guard/ctl selftest": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl repair": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl enable": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl disable": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl discover": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl trace": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl ack-audit": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl passwall-apply *": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl passwall-remove *": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl passwall-restart": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl passwall-remove": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl update": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl reset-counters": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl flush": [
+					"exec"
+				],
+				"/usr/libexec/claude-guard/ctl passwall-ensure": [
+					"exec"
+				]
+			},
+			"uci": [
+				"claude_guard"
+			]
+		}
+	}
+}

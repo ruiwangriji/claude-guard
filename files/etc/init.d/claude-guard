@@ -1,0 +1,79 @@
+#!/bin/sh /etc/rc.common
+# Claude 防直连保护
+# START=13：紧跟在系统日志（12）之后，早于 dnsmasq、firewall（19）和 network（20），
+# WAN 拨号、任何网口起来之前拦截规则就已在内核中。
+# stop 只停看护进程，不卸规则（关机、重启服务时不会出现空窗）。
+# 停用保护：/etc/init.d/claude-guard unload 或 /usr/libexec/claude-guard/ctl disable
+
+START=13
+STOP=99
+USE_PROCD=1
+EXTRA_COMMANDS="unload"
+EXTRA_HELP="	unload	停用保护并卸下拦截规则（等同管理页「停用保护」）"
+
+CTL=/usr/libexec/claude-guard/ctl
+
+# Lua 出问题时的兜底：只用静态段，直接丢弃
+fallback_rules() {
+	local v4 v6
+	v4=$(sed -n 's/^\([0-9][0-9.]*\/[0-9]*\).*/\1/p' /etc/claude-guard/static.list 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+	v6=$(sed -n 's/^\([0-9a-fA-F]*:[0-9a-fA-F:]*\/[0-9]*\).*/\1/p' /etc/claude-guard/static.list 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+	[ -n "$v4" ] || v4="160.79.104.0/21,153.61.0.0/16,216.73.216.0/22"
+	[ -n "$v6" ] || v6="2607:6bc0::/32"
+	nft -f - <<EOF
+table inet claude_guard
+delete table inet claude_guard
+table inet claude_guard {
+	set dst4 { type ipv4_addr; flags interval; auto-merge; elements = { $v4 } }
+	set dst6 { type ipv6_addr; flags interval; auto-merge; elements = { $v6 } }
+	chain guard_forward { type filter hook forward priority filter - 20; policy accept; ip daddr @dst4 drop; ip6 daddr @dst6 drop; }
+	chain guard_audit { type filter hook postrouting priority filter; policy accept; oifname "lo" return; ip daddr @dst4 drop; ip6 daddr @dst6 drop; }
+}
+EOF
+	logger -t claude-guard -p daemon.crit "主程序加载失败，已用兜底规则（只含静态段）"
+}
+
+load_rules() {
+	local out
+	out=$($CTL apply 2>&1)
+	case "$out" in
+		*'"ok":true'*) return 0 ;;
+	esac
+	# 主程序已自行改用最小规则时，表是在的
+	nft list table inet claude_guard >/dev/null 2>&1 && return 0
+	fallback_rules
+}
+
+start_service() {
+	if [ "$(uci -q get claude_guard.main.enabled)" = "0" ]; then
+		logger -t claude-guard -p daemon.warn "保护处于停用状态，未加载拦截规则"
+	else
+		load_rules
+	fi
+	procd_open_instance daemon
+	procd_set_param command /usr/libexec/claude-guard/daemon.sh
+	procd_set_param respawn 3600 5 0
+	# 看护进程优先级高一些；内存紧张时也不先被杀（见 daemon.sh 里的 oom_score_adj）
+	procd_set_param nice -5
+	procd_close_instance
+}
+
+stop_service() {
+	logger -t claude-guard -p daemon.notice "看护进程停止；拦截规则仍在内核中"
+}
+
+reload_service() {
+	if [ "$(uci -q get claude_guard.main.enabled)" = "0" ]; then
+		$CTL apply >/dev/null 2>&1
+	else
+		load_rules
+	fi
+}
+
+service_triggers() {
+	procd_add_reload_trigger "claude_guard"
+}
+
+unload() {
+	$CTL disable
+}

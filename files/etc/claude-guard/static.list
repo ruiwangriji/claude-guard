@@ -1,0 +1,7 @@
+# Claude 防直连保护 · 静态地址段（一行一段，# 后为说明）
+# 只放整段归 Anthropic 的地址，按这些段拦不会误伤别家网站。
+# 改完执行 /usr/libexec/claude-guard/ctl apply 生效；格式错误的行会被跳过并在管理页列出。
+160.79.104.0/21    # Anthropic, PBC（ARIN NetName AP-2440），2026-11-08 whois 核对；claude.ai、api.anthropic.com 等解析到 160.79.104.10
+2607:6bc0::/32     # Anthropic, PBC（ARIN NetName ANTHROPIC-V6），2026-11-08 whois 核对；AAAA 为 2607:6bc0::10
+153.61.0.0/16      # Anthropic, PBC（ARIN NetName AP-2440，2026-06-17 登记），2026-11-11 向 ARIN 核对
+216.73.216.0/22    # Anthropic, PBC（ARIN NetName AWS-ANTHROPIC），2026-11-11 向 ARIN 核对

@@ -1,0 +1,22 @@
+#!/bin/sh
+# Claude 防直连保护 · 命令入口（输出 JSON）
+#   ctl status            查看状态（不改动任何东西）
+#   ctl selftest          立即自检（含出口检测）
+#   ctl repair            重新加载规则并清理残留直连连接
+#   ctl enable / disable  启用 / 停用保护（停用会卸下拦截规则）
+#   ctl apply             按当前配置重新加载规则（原子替换，无空窗）
+#   ctl discover          立即解析域名、更新动态地址
+#   ctl trace             检测 Claude 看到的出口
+#   ctl passwall-apply <节点ID> [restart]   在 PassWall 写入 Claude 分流规则
+#   ctl passwall-remove [restart]          从 PassWall 删除 Claude 分流规则
+#   ctl confirm           安装后确认（取消自动回滚）
+case "$1" in
+	confirm)
+		mkdir -p /tmp/claude-guard && touch /tmp/claude-guard/confirmed
+		logger -t claude-guard "安装已确认，取消自动回滚"
+		echo '{"ok":true}'
+		;;
+	*)
+		exec /usr/bin/lua /usr/libexec/claude-guard/guard.lua "$@"
+		;;
+esac
