@@ -111,7 +111,7 @@ echo "$CONFFILES" | while read -r f; do echo "$f $(sha256sum "$R$f" | cut -d' ' 
 ( cd "$R" && find . -type f -o -type l | sed 's#^\.##' | sort ) > "$T/list"; mv "$T/list" "$R/lib/apk/packages/$PKG.list"
 apk mkpkg --compat 3.0.5 \
 	--info "name:$PKG" --info "version:$FULLVER" --info "arch:noarch" \
-	--info "description:$DESC" --info "license:Proprietary" --info "origin:$PKG" \
+	--info "description:$DESC" --info "license:GPL-3.0-or-later" --info "origin:$PKG" \
 	--info "depends:$DEPS_APK" \
 	--script "post-install:$T/postinst" --script "post-upgrade:$T/post-upgrade" \
 	--script "pre-deinstall:$T/prerm" --script "post-deinstall:$T/postrm" \
@@ -126,7 +126,7 @@ Package: $PKG
 Version: $FULLVER
 Depends: $DEPS_IPK
 Source: $PKG
-License: Proprietary
+License: GPL-3.0-or-later
 Section: luci
 Architecture: all
 Installed-Size: $(du -sk "$R" | cut -f1)000
